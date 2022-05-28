@@ -4,7 +4,7 @@ use crate::random::random_range;
 
 pub type Position = (usize, usize);
 
-#[derive(Debug)]
+#[derive(Debug, Copy, Clone)]
 pub enum Direction {
     Up,
     Down,
@@ -18,6 +18,7 @@ pub struct CentipedeGame {
     pub height: usize,
     pub centipede: VecDeque<Position>,
     pub direction: Direction,
+    pub next_direction: Direction,
     pub insect_position: Position,
     pub game_over: bool,
 }
@@ -29,22 +30,27 @@ impl CentipedeGame {
             height,
             centipede: [((width - 2).max(0), height / 2)].into_iter().collect(),
             direction: Direction::Left,
+            next_direction: Direction::Left,
             insect_position: (2.min(width - 1), height / 2),
             game_over: false,
         };
     }
 
     pub fn update_direction(&mut self, direction: Direction) {
+        if self.game_over {
+            return;
+        }
+
         match (&self.direction, direction) {
             (Direction::Up, Direction::Up)
             | (Direction::Up, Direction::Down)
+            | (Direction::Right, Direction::Right)
+            | (Direction::Right, Direction::Left)
             | (Direction::Down, Direction::Up)
             | (Direction::Down, Direction::Down)
-            | (Direction::Left, Direction::Left)
             | (Direction::Left, Direction::Right)
-            | (Direction::Right, Direction::Left)
-            | (Direction::Right, Direction::Right) => {}
-            (_, direction) => self.direction = direction,
+            | (Direction::Left, Direction::Left) => {}
+            (_, direction) => self.next_direction = direction,
         }
     }
 
@@ -71,12 +77,14 @@ impl CentipedeGame {
             return;
         }
 
+        self.direction = self.next_direction;
+
         let (x, y) = self.centipede[0];
         let new_head = match &self.direction {
-            Direction::Up => (x, (y - 1).max(1)),
-            Direction::Down => (x, (y + 1).max(self.height)),
-            Direction::Left => (x - 1.max(1), y),
-            Direction::Right => (x + 1.max(self.width), y),
+            Direction::Up => (x, (y - 1)),
+            Direction::Down => (x, (y + 1)),
+            Direction::Left => (x - 1, y),
+            Direction::Right => (x + 1, y),
         };
 
         let is_out_of_bounds = !self.is_valid_position(new_head);
