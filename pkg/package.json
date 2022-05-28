@@ -1,0 +1,12 @@
+{
+  "name": "wasmcentipede",
+  "version": "0.1.0",
+  "files": [
+    "wasmcentipede_bg.wasm",
+    "wasmcentipede.js",
+    "wasmcentipede.d.ts"
+  ],
+  "module": "wasmcentipede.js",
+  "types": "wasmcentipede.d.ts",
+  "sideEffects": false
+}

@@ -1,0 +1,1 @@
+wasm-pack build --target web && rm ./pkg/.gitignore && cp ./index.html ./pkg
