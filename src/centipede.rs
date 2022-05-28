@@ -14,12 +14,12 @@ pub enum Direction {
 
 #[derive(Debug)]
 pub struct CentipedeGame {
-    width: usize,
-    height: usize,
-    centipede: VecDeque<Position>,
-    direction: Direction,
-    insect_position: Position,
-    game_over: bool,
+    pub width: usize,
+    pub height: usize,
+    pub centipede: VecDeque<Position>,
+    pub direction: Direction,
+    pub insect_position: Position,
+    pub game_over: bool,
 }
 
 impl CentipedeGame {

@@ -9,7 +9,7 @@ use wasm_bindgen::{
     prelude::{wasm_bindgen, Closure},
     JsCast, UnwrapThrowExt,
 };
-use web_sys::window;
+use web_sys::{window, HtmlDivElement, HtmlElement};
 
 thread_local! {
     static GAME: Rc<RefCell<CentipedeGame>> = Rc::new(RefCell::new(CentipedeGame::new(20, 20)));
@@ -31,7 +31,61 @@ pub fn main() {
             )
             .unwrap_throw()
     });
+
+    render();
 }
 
-// TODO: render game on screen with web::sys
-pub fn render() {}
+pub fn render() {
+    let document = window().unwrap_throw().document().unwrap_throw();
+
+    let root_container = document
+        .get_element_by_id("root")
+        .unwrap_throw()
+        .dyn_into::<HtmlElement>()
+        .unwrap_throw();
+
+    root_container.set_inner_html("");
+
+    let grid_width = GAME.with(|game| game.borrow().width);
+    let grid_height = GAME.with(|game| game.borrow().height);
+
+    root_container
+        .style()
+        .set_property("display", "grid")
+        .unwrap_throw();
+
+    root_container
+        .style()
+        .set_property(
+            "grid-template",
+            &format!(
+                "repeat({}, auto) / repeat({}, auto)",
+                grid_width, grid_height
+            ),
+        )
+        .unwrap_throw();
+
+    for y in 0..grid_height {
+        for x in 0..grid_width {
+            let position = (x, y);
+
+            let field_element = document
+                .create_element("div")
+                .unwrap_throw()
+                .dyn_into::<HtmlDivElement>()
+                .unwrap_throw();
+
+            field_element.set_inner_text({
+                if position == GAME.with(|game| game.borrow().insect_position) {
+                    "🦋"
+                } else if GAME.with(|game| game.borrow().centipede.contains(&position)) {
+                    "🟩"
+                } else {
+                    "⬜"
+                }
+            });
+
+            root_container.append_child(&field_element).unwrap_throw();
+        }
+    }
+}
